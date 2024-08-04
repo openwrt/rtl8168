@@ -992,6 +992,14 @@ rtl8168_sysfs_testmode_on(struct rtl8168_private *tp)
 #endif
 }
 
+static char* rtl8101_convert_link_duplex(u16 status)
+{
+        if ((status & _1000bpsF) || (status & FullDup))
+                return "Full";
+        else
+                return "Half";
+}
+
 static u32 rtl8168_convert_link_speed(u16 status)
 {
         u32 speed = SPEED_UNKNOWN;
@@ -5392,11 +5400,16 @@ rtl8168_check_link_status(struct net_device *dev)
                 if (link_status_on) {
                         rtl8168_link_on_patch(dev);
 
-                        if (netif_msg_ifup(tp))
-                                printk(KERN_INFO PFX "%s: link up\n", dev->name);
+                        if (netif_msg_ifup(tp)) {
+                                const u16 status = RTL_R8(tp, PHYstatus);
+                                printk(KERN_INFO PFX "%s: Link is Up - %dMbps/%s\n",
+                                       dev->name,
+                                       rtl8168_convert_link_speed(status),
+                                       rtl8101_convert_link_duplex(status));
+                        }
                 } else {
                         if (netif_msg_ifdown(tp))
-                                printk(KERN_INFO PFX "%s: link down\n", dev->name);
+                                printk(KERN_INFO PFX "%s: Link is Down\n", dev->name);
 
                         rtl8168_link_down_patch(dev);
                 }
