@@ -121,6 +121,8 @@ ifneq ($(KERNELRELEASE),)
 	ifeq ($(ENABLE_GIGA_LITE), y)
 		EXTRA_CFLAGS += -DENABLE_GIGA_LITE
 	endif
+
+	ccflags-y += $(EXTRA_CFLAGS)
 else
 	BASEDIR := /lib/modules/$(shell uname -r)
 	KERNELDIR ?= $(BASEDIR)/build
